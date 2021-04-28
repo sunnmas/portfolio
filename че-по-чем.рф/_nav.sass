@@ -1,0 +1,191 @@
+nav#main-nav
+	#title
+		width: 100%
+		position: relative
+		display: block
+		background-color: $logo-background-color
+		height: $search-normal-height
+		text-align: center
+		line-height: $search-normal-height
+		@include header(20px, $logo-font-color)
+		letter-spacing: 5px
+		#environment
+			width: 100%
+			position: absolute
+			top: 42px
+			text-align: center
+			color: white
+			letter-spacing: 5px
+			text-transform: uppercase
+			@include bold-font
+			font-size: 8px
+		@include respond-to(small-screens)
+			height: $search-small-height
+			line-height: $search-small-height
+			@include header(14px, $logo-font-color)
+	#user-panel
+		width: 100%
+		#user
+			height: 50px
+			box-sizing: border-box
+			#name
+				color: $user-name-font-color
+				@include sans-font
+				font-weight: 400
+				line-height: 50px
+				display: inline-block
+				vertical-align: top
+				float: left
+				width: 200px
+				text-overflow: ellipsis
+				overflow: hidden
+				white-space: nowrap
+		#user.signed-in:hover
+			cursor: pointer
+			background-color: $quick-link-background-hover-color
+	$link-height: 35px
+	#user-geo-location
+		position: relative
+		height: 50px
+		padding: 0 50px
+		background-color: black
+		cursor: pointer
+		transition-duration: 0.3s
+		transition-timing-function: linear
+		border-left: 4px solid transparent
+		#location-img
+			position: absolute
+			left: 19px
+			top: 15px
+			height: 16px
+			width: 15px
+			transform: scale(1.4)
+		#city
+			@include sans-font
+			font-weight: bold
+			color: white
+			line-height: 50px
+			position: absolute
+			left: 45px
+			top: 0
+			right: 0
+			bottom: 0
+			text-overflow: ellipsis
+			overflow: hidden
+			white-space: nowrap
+			width: 185px
+		#city:after
+			content: ""
+			width: 0px
+			height: 0px
+			right: -6px
+			top: 20px
+			position: absolute
+			border: 5px solid transparent
+			border-left: 5px solid red
+	#user-geo-location:hover
+		background-color: $quick-link-background-hover-color
+		border-left: 4px solid $red
+		#location-img
+			transform: scale(1.5)
+	#quick-links
+		a, .quick-link
+			transition-duration: 0.1s
+			transition-timing-function: linear
+			position: relative
+			display: block
+			height: $link-height
+			line-height: $link-height
+			border-left: 4px solid transparent
+			
+			@include sans-font
+			font-weight: normal
+			font-size: 14px
+			padding: 0 $link-height + 10px
+			cursor: pointer
+			div
+				color: $quick-link-font-color
+			.sprite
+				width: 16px
+				height: 16px
+				position: absolute
+				top: 8px
+				left: 18px
+			.link-title
+				display: inline-block
+			.cnt
+				display: inline-block
+				color: $counters-color
+				position: absolute
+				font-size: 11px
+				right: 20px
+				top: 5px
+
+
+		a.active, a:hover, .quick-link:hover, #user.signed-in
+			background-color: $quick-link-background-hover-color
+			border-left: 4px solid $green
+			color: $quick-link-font-hover-color
+			.cnt
+				color: white
+		a:hover, .quick-link:hover
+			svg
+				transform: scale(1.2)
+
+		#admin-panel-wrapper
+			a:hover
+				border-left: 4px solid $red
+			a.active
+				background-color: $red
+				border-left: 4px solid $red
+				div
+					color: $quick-link-background-hover-color
+	@include respond-to(tablet-screens)
+		#title
+			font-size: 18px
+			width: 150px
+			padding-left: 0 5px
+			#environment
+				letter-spacing: 3px
+				font-size: 7px
+				top: 40px
+		#user-panel
+			#user
+				#name
+					display: none
+		#user-geo-location
+			padding: 0
+			#location-img
+				left: 14px
+			#city
+				display: none
+		#quick-links
+			a, .quick-link
+				padding: 0 0
+				.link-title, .cnt
+					display: none
+				.sprite
+					left: 13px
+	@include respond-to(mobile-screens)
+		#title
+			width: 100%
+			padding-left: 0 5px
+			#environment
+				letter-spacing: 5px
+				font-size: 8px
+				top: 42px
+		#user-panel
+			#user
+				#name
+					display: block
+		#user-geo-location
+			padding: 0 50px
+			#location-img
+				left: 19px
+		#quick-links
+			a, .quick-link
+				padding: 0 $link-height + 10px
+				.sprite
+					left: 19px
+.admin
+	background-color: $red

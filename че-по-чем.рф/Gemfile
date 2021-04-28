@@ -1,0 +1,102 @@
+source 'http://rubygems.org'
+ruby '2.6.0'
+# Базовые:
+gem 'rails', '5.2.3'
+gem 'webpacker', '4.2.0'
+gem 'puma', '3.12.0'
+gem 'haml', '5.0.4'
+gem 'coffee-rails', '4.2.2'
+gem 'sass-rails', '5.0.7'
+gem 'uglifier', '4.1.20'
+gem 'redis-rails', '5.0.2' #provides a full set of stores (Cache, Session, HTTP Cache) for Ruby on Rails
+# Асинхронные задачи:
+gem 'redis', '4.1.3'
+gem 'sidekiq', '6.0.3'
+# Scheduler
+gem 'clockwork', '2.0.4'
+# Databases
+group :production do
+  gem 'pg', '1.2.2'
+end
+gem 'ruby-mysql', '2.9.14'
+# Auth
+gem 'devise', '4.4.3'
+gem 'omniauth', '1.8.1'
+gem 'omniauth-yandex'
+gem 'omniauth-facebook', '4.0.0'
+gem 'omniauth-vkontakte', '1.4.1'
+gem 'omniauth-odnoklassniki', '0.0.8'
+# Search
+gem 'sunspot_rails', '2.5.0' #search
+gem 'progress_bar' # Отображение прогресс бара в sunspot:solr:reindex
+# Media
+gem 'mini_magick', '4.2.7'
+gem 'carrierwave', '2.0.0.rc' #Аплоад файлов
+gem 'carrierwave_watermarker', '0.1.0' # Водяные знаки на картинках
+gem 'carrierwave-webp', :git => 'git://github.com/sunnmas/carrierwave-webp.git', :ref => '6efbacab7880577215c699d837f886e4a4771dc6', branch: 'master'
+  # This library can be made faster by installing a simple C 
+  # extension called oily_png
+gem 'oily_png'
+gem 'chartjs-ror', '3.6.4'
+
+gem 'i18n', '1.1.0'
+gem 'simple_form', '4.0.0'
+gem 'kaminari', '1.1.1' #пагинация
+gem 'vkontakte_api', '1.4.4'
+gem 'unicode', '0.4.4.4'
+gem 'xml-sitemap', '1.3.3'
+gem 'recaptcha', '5.2.1', require: 'recaptcha/rails'
+gem 'yt', '~> 0.25.5'
+gem 'google_url_shortener', '1.1.0'
+gem 'bitly', '1.1.2'
+gem 'isgd', '1.0.5'
+
+#Mail
+gem 'exception_notification', '4.2.2'
+# Асинхронные отправки почты
+gem 'sidekiq_mailer', '0.0.8' 
+# gem 'resque_mailer', '2.2.7' 
+gem 'premailer-rails', '1.10.2' #css for mail
+
+# #push notifications
+# # gem 'rpush', '2.7.0'
+# gem 'net-http-persistent', '2.9.4' #3.0.0 crash rpush
+
+# Пуникод:
+# gem 'simpleidn', '0.0.9'
+# Транслит:
+gem 'translit'
+# Работа ZIP архивами: 
+gem 'rubyzip', '>= 1.0.0'
+# Информация об устройстве пользователя:
+gem 'device_wizard', '1.0.1'
+# Определение местоположения от Яндекса
+gem 'yandex_locator', '1.1.1'
+# Определение расстояния между двумя точками
+gem 'haversine_distance', '1.0.0'
+# Reduces boot times through caching; required in config/boot.rb
+gem 'bootsnap', '>= 1.1.0', require: false
+# Склонения
+gem 'petrovich', '1.1.1'
+
+group :development, :test do
+  gem 'sunspot_solr', '2.5.0' #sunspot_solr gem is a convenient way to start working with Solr in development
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  # Adds support for Capybara system testing and selenium driver
+  gem 'selenium-webdriver'
+end
+
+group :development do
+  gem "capistrano", '3.12.0'
+  # Access an IRB console on exception pages or by using <%= console %> anywhere in the code.
+  gem 'web-console', '>= 3.3.0'
+end
+
+group :test do
+  gem 'rspec-rails', '3.8.1'
+  gem 'factory_bot_rails', '4.11.1'
+  gem 'capybara'
+  gem 'database_cleaner'
+  gem 'rails-controller-testing'
+end

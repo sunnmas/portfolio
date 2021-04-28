@@ -1,0 +1,72 @@
+body
+	overflow-x: hidden
+html, body
+	height: 100%
+	background-color: $nav-bar-color
+	#layout
+		transition-duration: 0.5s
+		transition-timing-function: ease
+		transition-property: margin-left
+		height: 100%
+		width: 100%
+		min-width: $min-width
+		margin: 0 auto 0 auto
+		margin-left: 0
+		text-rendering: optimizeLegibility!important
+		nav#main-nav
+			background-color: $nav-bar-color
+			position: fixed
+			top: 0
+			left: auto
+			width: $nav-width
+			height: 100%
+			z-index: 200
+		#page
+			padding-left: $nav-width
+			padding-top: $search-normal-height
+			box-sizing: border-box
+			position: relative
+
+			display: table
+			table-layout: fixed
+			height: 100%
+			width: 100%
+			#page-content
+				display: table-cell
+				background-color: $layout-color
+				#main-column
+					// display: table
+					height: 100%
+					width: 100%
+					background-color: $layout-color
+					box-sizing: border-box
+					#content-wrapper
+						// display: table-row
+						width: 100%
+						height: 100%
+						position: relative
+						#content
+							padding: 0 $side-content-padding 50px $side-content-padding
+							@include respond-to(small-screens)
+								padding: 0 $side-content-padding-small-screen 50px $side-content-padding-small-screen
+						
+		@include respond-to(tablet-less-screens)
+			nav#main-nav
+				width: 50px
+			#page
+				padding-left: 50px
+		@include respond-to(mobile-screens)
+			nav#main-nav
+				width: $nav-width
+				margin-left: -$nav-width
+				float: left
+
+			#page, #footer
+				padding-left: 0px
+				margin-right: 0
+		@include respond-to(small-screens)
+			#page
+				padding-top: $search-small-height
+@include respond-to(tablet-less-screens)
+	html, body
+		background-color: $nav-bar-color

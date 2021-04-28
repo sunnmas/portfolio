@@ -1,0 +1,354 @@
+= render :partial => 'layouts/menu'
+
+h2 Список товаров
+.incotex-items
+	.header
+		.code Код
+		.name  Наименование
+		.barcode Штрихкод
+		.price Цена
+		.section title="Отдел (Секция)" Отд
+		.undivided title="Штучный" Шт
+		.marking title="Маркированный" Мрк
+		.tax_system title="Система налогообложения" СНО
+		.tax_code title="Налог на добавленную стоимость" НДС
+		.type_code title="Признак предмета расчета" ППР
+	- for item in @items
+		.item
+			=render partial: 'item', locals: {item: item}
+.button-box
+	.button#load-file-to-server Загрузить в ЛК
+	.button.hidden#destroy-all-incotex-item Удалить все
+	.button#show-form-create-incotex-item Добавить
+	.button#send-to-kkt Послать в ККМ
+
+#load-file-to-server-form.centered-form-wrapper.hidden
+	form.screen-centered action="/загрузить/номенклатуру/из/файла" method="post" enctype="multipart/form-data"
+		h3 Загрузка номенклатуры в кабинет
+		input name="authenticity_token" value="#{form_authenticity_token}" type="hidden"
+		label for="goodsfile" Файл json/xls:
+		input id="goodsfile" name="file" value="" type="file" accept=".xls,.json"
+		input.button type="submit"
+
+.centered-form-wrapper.hidden#incotex-item-form
+	form.wide.screen-centered
+		h3#incotex-item-form-header Редактирование товарной позиции
+		.wide-column
+			label for="incotex_item_name" Наименование:
+			input#incotex_item_name maxlength="56" type="text"
+			.field-example Йогурт питьевой, 0.5л
+
+		.column
+			label for="incotex_item_barcode" Штрихкод:
+			input#incotex_item_barcode maxlength="13" type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"
+
+			label for="incotex_item_tax_code" Налог на добавленную стоимость:
+			select#incotex_item_tax_code
+				- IncotexItem.human_tax_codes.each_with_index do |name, index|
+						option value="#{index+1}" = name
+
+			label for="incotex_item_code" Код:
+			input#incotex_item_code type="number" min="1" value="1"
+
+			.checkbox
+				label for="incotex_item_undivided" Штучный
+				input#incotex_item_undivided name="undivided" type="checkbox"
+
+			label for="incotex_item_section" Отдел:
+			input#incotex_item_section type="number" min="0" value="1"
+
+		.column
+			label for="incotex_item_price" Цена:
+			input#incotex_item_price type="number" step="0.01" min="0.0" value="0"
+
+
+			label for="incotex_item_tax_system" Система налогообложения:
+			select#incotex_item_tax_system
+				- IncotexItem.human_tax_systems.each_with_index do |name, index|
+						option value="#{index-1}" = name
+
+			label for="incotex_item_type_code" title="Признак предмета расчета" ППР:
+			select#incotex_item_type_code
+				- IncotexItem.human_type_codes.each_with_index do |name, index|
+						option short="#{IncotexItem.short_type_codes[index]}" value="#{index+1}" = name
+
+			.checkbox
+				label for="marking" Маркированный
+				input#incotex_item_marking name="marking" type="checkbox"
+			.button#save-incotex-item Сохранить
+			.button#destroy-incotex-item Удалить
+			.button#create-incotex-item Создать
+		.clear
+		
+
+javascript:
+	incotex_item = null;
+
+	start_edit_item = function(e) {
+		item = $(e.target).parent();
+		incotex_item = item;
+
+		code = item.find(".code").text();
+		name = item.find(".name").text();
+		barcode = item.find(".barcode").text();
+		price = item.find(".price").text();
+		section = item.find(".section").text();
+
+		tax_system = item.find(".tax_system").attr("indx");
+		tax_code = item.find(".tax_code").attr("indx");
+		type_code = item.find(".type_code").attr("indx");
+
+		marking = item.find(".marking").text();
+		undivided = item.find(".undivided").text();
+
+		$("#incotex_item_code").val(code);
+		$("#incotex_item_name").val(name);
+		$("#incotex_item_barcode").val(barcode);
+		$("#incotex_item_price").val(price);
+		$("#incotex_item_section").val(section);
+
+		$("#incotex_item_tax_system").val(tax_system);
+		$("#incotex_item_tax_code").val(tax_code);
+		$("#incotex_item_type_code").val(type_code);
+
+		marking_chkbx = $("#incotex_item_marking");
+		if (marking == "✔") {
+			marking_chkbx.prop("checked", true);
+			marking_chkbx.parent().addClass("checked");
+		}
+		else{
+			marking_chkbx.prop("checked", false);
+			marking_chkbx.parent().removeClass("checked");
+		}
+
+		undivided_chkbx = $("#incotex_item_undivided");
+		if (undivided == "✔") {
+			undivided_chkbx.prop("checked", true);
+			undivided_chkbx.parent().addClass("checked");
+		}
+		else{
+			undivided_chkbx.prop("checked", false);
+			undivided_chkbx.parent().removeClass("checked");
+		}
+		
+		$("#incotex-item-form-header").text("Редактирование товарной позиции");
+
+		$("#save-incotex-item").removeClass("hidden");
+		$("#destroy-incotex-item").removeClass("hidden");
+		$("#create-incotex-item").addClass("hidden");
+		$("#incotex-item-form").removeClass("hidden");
+	}
+
+	$(".incotex-items > .item").click(start_edit_item);
+
+	edit_item = function() {
+		item = incotex_item;
+
+		id = $(item).find(".code").attr("index");
+		code = $("#incotex_item_code").val();
+		name = $("#incotex_item_name").val();
+		barcode = $("#incotex_item_barcode").val();
+		price = $("#incotex_item_price").val();
+		section = $("#incotex_item_section").val();
+		tax_system = $("#incotex_item_tax_system option:selected").text();
+		tax_code = $("#incotex_item_tax_code option:selected").text();
+		type_code = $("#incotex_item_type_code option:selected").attr("short");
+		type_code_value = $("#incotex_item_type_code option:selected").val();
+		marking = $("#incotex_item_marking").is(":checked");
+		undivided = $("#incotex_item_undivided").is(":checked");
+
+
+		$.ajax({
+			method: 'POST',
+			url: '/отредактировать/товар',
+			headers: {
+				Accept: "application/json; charset=utf-8"
+			},
+			dataType: 'json',
+			crossDomain: false,
+			data: {
+					"id": id,
+					"incotex_item[code]": code,
+					"incotex_item[name]": name,
+					"incotex_item[barcode]": barcode,
+					"incotex_item[price]": price,
+					"incotex_item[section]": section
+			},
+			error: function(err) {
+				err = JSON.parse(err.responseText)
+				window.flash.error(err.msg);
+			}
+		}).done(function(ans) {
+			window.flash.msg(ans.msg);
+			item.find(".code").text(code);
+			item.find(".name").text(name);
+			item.find(".barcode").text(barcode);
+			item.find(".price").text(price);
+			item.find(".section").text(section);
+			item.find(".tax_system").text(tax_system);
+			item.find(".tax_code").text(tax_code);
+			item.find(".type_code").text(type_code);
+			item.find(".type_code").attr("indx", type_code_value);
+			item.find(".type_code").attr("title", $("#incotex_item_type_code option:selected").text());
+
+			if (marking == true) {
+				item.find(".marking").text("✔");
+			}
+			else {
+				item.find(".marking").text("✘");
+			}
+			if (undivided == true) {
+				item.find(".undivided").text("✔");
+			}
+			else {
+				item.find(".undivided").text("✘");
+			}
+
+			$(".centered-form-wrapper").addClass("hidden");
+		});
+	}
+
+	$("#save-incotex-item").click(edit_item);
+
+	$("#create-incotex-item").click(function() {
+		code = $("#incotex_item_code").val();
+		name = $("#incotex_item_name").val();
+		barcode = $("#incotex_item_barcode").val();
+		price = $("#incotex_item_price").val();
+		section = $("#incotex_item_section").val();
+		tax_system = $("#incotex_item_tax_system option:selected").val();
+		tax_code = $("#incotex_item_tax_code option:selected").val();
+		type_code = $("#incotex_item_type_code option:selected").val();
+		marking = $("#incotex_item_marking").is(":checked");
+		undivided = $("#incotex_item_undivided").is(":checked");
+
+		$.ajax({
+			method: 'POST',
+			url: '/добавить/товар',
+			headers: {
+				Accept: "application/json; charset=utf-8"
+			},
+			dataType: 'json',
+			crossDomain: false,
+			data: {
+					"incotex_item[code]": code,
+					"incotex_item[name]": name,
+					"incotex_item[barcode]": barcode,
+					"incotex_item[price]": price,
+					"incotex_item[section]": section,
+					"incotex_item[tax_system]": tax_system,
+					"incotex_item[tax_code]": tax_code,
+					"incotex_item[type_code]": type_code,
+					"incotex_item[marking]": marking,
+					"incotex_item[undivided]": undivided
+			},
+			error: function(err) {
+				err = JSON.parse(err.responseText)
+				window.flash.error(err.msg);
+			}
+		}).done(function(ans) {
+			window.flash.msg(ans.msg);
+
+			tax_system = $("#incotex_item_tax_system option:selected").text();
+			tax_system_val = $("#incotex_item_tax_system option:selected").val();
+			tax_code = $("#incotex_item_tax_code option:selected").text();
+			tax_code_val = $("#incotex_item_tax_code option:selected").val();
+			type_code = $("#incotex_item_type_code option:selected").attr("short");
+			type_code_val = $("#incotex_item_type_code option:selected").val();
+			
+			if (marking == true) {marking = "✔";} else {marking = "✘";}
+			if (undivided == true) {undivided = "✔";} else {undivided = "✘";}
+
+			item = $("<div class=\"item\"></div>");
+			item.append("<div class=\"code\" index=\""+ans.id+"\">"+code+"</div>")
+			item.append("<div class=\"name\">"+name+"</div>")
+			item.append("<div class=\"barcode\">"+barcode+"</div>")
+			item.append("<div class=\"price\">"+price+"</div>")
+			item.append("<div class=\"section\">"+section+"</div>")
+			item.append("<div class=\"undivided\">"+undivided+"</div>")
+			item.append("<div class=\"marking\">"+marking+"</div>")
+			item.append("<div class=\"tax_system\" indx=\""+tax_system_val+"\">"+tax_system+"</div>")
+			item.append("<div class=\"tax_code\" indx=\""+tax_code_val+"\">"+tax_code+"</div>")
+			item.append("<div class=\"type_code\" indx=\""+type_code_val+"\">"+type_code+"</div>");
+			item.click(start_edit_item);
+			$(".incotex-items").append(item);
+
+			$("#incotex-item-form").addClass("hidden");
+		});
+	});
+
+	$("#show-form-create-incotex-item").click(function() {
+		$("#incotex-item-form-header").text("Создание товарной позиции");
+		$("#save-incotex-item").addClass("hidden");
+		$("#destroy-incotex-item").addClass("hidden");
+		$("#create-incotex-item").removeClass("hidden");
+		$("#incotex-item-form").removeClass("hidden");
+	});
+
+	$("#load-file-to-server").click(function(e) {
+		$("#load-file-to-server-form").removeClass("hidden");
+	});
+
+	$("#destroy-incotex-item").click(function() {
+		item = incotex_item;
+		id = $(item).find(".code").attr("index");
+		$.ajax({
+			method: 'POST',
+			url: '/удалить/товар',
+			headers: {
+				Accept: "application/json; charset=utf-8"
+			},
+			dataType: 'json',
+			crossDomain: false,
+			data: {
+					"id": id,
+			},
+			error: function(err) {
+				err = JSON.parse(err.responseText)
+				window.flash.error(err.msg);
+			}
+		}).done(function(ans) {
+			window.flash.msg(ans.msg);
+			item.remove();
+			$(".centered-form-wrapper").addClass("hidden");
+		});
+	});
+
+	$("#destroy-all-incotex-item").click(function() {
+		$.ajax({
+			method: 'POST',
+			url: '/удалить/товары',
+			headers: {
+				Accept: "application/json; charset=utf-8"
+			},
+			dataType: 'json',
+			crossDomain: false,
+			data: {	},
+			error: function(err) {
+				err = JSON.parse(err.responseText)
+				window.flash.error(err.msg);
+			}
+		}).done(function(ans) {
+			window.flash.msg(ans.msg);
+			$(".incotex-items .item").remove();
+		});
+	});
+
+	$("#send-to-kkt").click(function() {
+		$.ajax({
+			method: 'POST',
+			url: '/послать/на/кассы',
+			headers: {
+				Accept: "application/json; charset=utf-8"
+			},
+			dataType: 'json',
+			crossDomain: false,
+			data: {},
+			error: function(err) {
+				err = JSON.parse(err.responseText)
+				window.flash.error(err.msg);
+			}
+		}).done(function(ans) {
+			window.flash.msg(ans.msg);
+		});
+	});

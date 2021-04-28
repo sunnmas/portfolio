@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>res/sea.gif</file>
+    <file>res/periscope.jpg</file>
+    <file>res/nosignal.jpg</file>
+    <file>res/scope.png</file>
+</qresource>
+</RCC>

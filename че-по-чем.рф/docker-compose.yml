@@ -1,0 +1,91 @@
+version: "3.7"
+services:
+  pg:
+    image: postgres:11.5-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=4e.usr
+      - POSTGRES_PASSWORD=xxxxx
+      - POSTGRES_DB=4e4o
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/4e4o/shared/db/pg/etc:/etc/postgresql
+      - ~/4e4o/shared/log/pg:/var/log/postgresql
+      - ~/4e4o/shared/db/pg/data:/var/lib/postgresql/data
+      - ~/4e4o/shared/db/pg/backups:/backups
+      - /tmp:/tmp
+    networks:
+      b.code:
+        ipv4_address: 172.10.0.2
+  redis:
+    image: redis:5.0.3-alpine
+    container_name: redis
+    restart: always
+    expose:
+      - '6380'
+    volumes:
+      - ~/4e4o/shared/db/redis:/data
+      - /tmp:/tmp
+    networks:
+      b.code:
+        ipv4_address: 172.10.0.3
+  search:
+    image: solr:7.7.2
+    container_name: solr
+    restart: always
+    ports:
+      - '8983:8983'
+    volumes:
+      - /home/deployer/4e4o/shared/solr:/opt/solr/server/solr/mycores
+      - /tmp:/tmp
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - staging
+    networks:
+      b.code:
+        ipv4_address: 172.10.0.4
+  rails:
+    image: 4e4o/rails:5.2.3
+    container_name: rails
+    build:
+      context: .
+      dockerfile: ./docker/rails/DockerFile
+    restart: always
+    environment:
+      - BUNDLE_PATH=/bundle
+    expose:
+      - 5000
+    depends_on:
+      - pg
+      - redis
+      - search
+    volumes:
+      - ~/4e4o/current:/4e4o:Z
+      - ~/4e4o/shared/tmp:/4e4o/tmp
+      - ~/4e4o/shared/log/rails:/4e4o/log
+      - ~/4e4o/shared/log/puma:/4e4o/log/puma
+      - ~/4e4o/shared/public/pics:/4e4o/public/pics
+      - ~/4e4o/shared/public/failed_pics:/4e4o/public/failed_pics
+      - ~/4e4o/shared/public/avatars:/4e4o/public/avatars
+      - ~/4e4o/shared/public/packs:/4e4o/public/packs
+      - ~/4e4o/shared/public/assets:/4e4o/public/assets
+      - ~/4e4o/shared/public/uploads:/4e4o/public/uploads
+      - ~/4e4o/shared/sitemaps/current:/4e4o/public/sitmap4e4o
+      - ~/4e4o/shared/sitemaps:/4e4o/sitemaps
+      - ~/4e4o/shared/node_modules:/4e4o/node_modules
+      - ~/reverse.proxy/letsencrypt:/4e4o/letsencrypt
+      - /tmp:/tmp
+    networks:
+      b.code:
+        ipv4_address: 172.10.0.5
+networks:
+  b.code:
+    driver: bridge
+    name: b.code
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.10.0.0/16
